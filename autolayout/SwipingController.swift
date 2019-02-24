@@ -21,16 +21,82 @@ class SwipingController: UICollectionViewController, UICollectionViewDelegateFlo
         
         Page(imageName: "leaf_third",
              headerText: "VIP members special services",
-             bodyText: "")
+             bodyText: "Join the private club of elite customers, will get you into select drawings and giveaways.")
     ]
     
-    //let imageNames = ["bear_first", "heart_second", "leaf_third"]
-    //let headerStrings = ["Join us today in our fun and games!",
-                         //"Subscribe and get coupons on our daily events",
-                         //"VIP members special services"]
+    private let previousButton: UIButton = {
+        let button = UIButton(type: .system )
+        button.setTitle("PREV", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 14)
+        button.setTitleColor(.gray, for: .normal)
+        button.addTarget(self, action: #selector(handlePrev), for:  .touchUpInside)
+        
+        return button
+    }()
+    
+    private let nextButton: UIButton = {
+        let button = UIButton(type: .system )
+        button.setTitle("NEXT", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 14)
+        button.setTitleColor(.gray, for: .normal)
+        button.setTitleColor(.mainPink, for: .normal)
+        button.addTarget(self, action: #selector(handleNext), for:  .touchUpInside)
+        
+        return button
+    }()
+    
+    private lazy var pageControl: UIPageControl = {
+        let pc = UIPageControl()
+        pc.currentPage = 0
+        pc.numberOfPages = pages.count
+        //let pinkColor = UIColor(red: 232/255, green: 68/255, blue: 133/255, alpha: 1)
+        pc.currentPageIndicatorTintColor = .mainPink
+        pc.pageIndicatorTintColor = UIColor(red: 249/255, green: 207/255, blue: 224/255, alpha: 1)
+        
+        return pc
+    }()
+    
+    @objc private func handleNext() {
+        
+        let nextIndex = min(pageControl.currentPage + 1, pages.count - 1)
+        let indexPath = IndexPath(item: nextIndex, section: 0)
+        pageControl.currentPage = nextIndex
+        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+        
+    }//end handleNext()
+    
+    @objc private func handlePrev() {
+        
+        let nextIndex = max(pageControl.currentPage - 1, 0)
+        let indexPath = IndexPath(item: nextIndex, section: 0)
+        pageControl.currentPage = nextIndex
+        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+        
+    }//end handlePrev()
+    
+    fileprivate func setupBottomControls() {
+        
+        let bottomControlsStackView = UIStackView(arrangedSubviews: [previousButton, pageControl, nextButton])
+        view.addSubview(bottomControlsStackView)
+        bottomControlsStackView.translatesAutoresizingMaskIntoConstraints = false
+        bottomControlsStackView.distribution = .fillEqually
+        //bottomControlsStackView.axis = .vertical
+        
+        NSLayoutConstraint.activate([
+            bottomControlsStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            bottomControlsStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            bottomControlsStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            bottomControlsStackView.heightAnchor.constraint(equalToConstant: 50)
+            ])
+        
+    }//end setupButtonControls()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setupBottomControls()
         
         collectionView.backgroundColor = .white
         collectionView.register(PageCell.self, forCellWithReuseIdentifier: "cellId")
@@ -54,7 +120,7 @@ class SwipingController: UICollectionViewController, UICollectionViewDelegateFlo
         //cell.bearImageView.image = UIImage(named: page.imageName)
         //cell.descriptionTextView.text = page.headerText
         
-        //bad way. it's easy to breaks
+        //bad way. it's easy to break
         //let imageName = imageNames[indexPath.item]
         //cell.bearImageView.image = UIImage(named: imageName)
         //cell.descriptionTextView.text = headerStrings[indexPath.item]
@@ -83,6 +149,14 @@ class SwipingController: UICollectionViewController, UICollectionViewDelegateFlo
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
          return 0
+    }
+    
+    override func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        
+        let x = targetContentOffset.pointee.x
+        
+        pageControl.currentPage = Int(x / view.frame.width)
+        
     }
     
     
