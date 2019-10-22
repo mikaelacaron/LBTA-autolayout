@@ -3,3 +3,5 @@
 - AutoLayout programmatically
 - MVC Architecture
 - Create "Paging" effect using a UICollectionViewController
+
+![](lbta-autolayout.gif)
